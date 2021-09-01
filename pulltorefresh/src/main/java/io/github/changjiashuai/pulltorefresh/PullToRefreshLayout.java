@@ -223,7 +223,9 @@ public class PullToRefreshLayout extends FrameLayout {
                     dy = Math.min(mMaxHeaderHeight, dy);
                     dy = Math.max(0, dy);
                     mHeaderView.getLayoutParams().height = (int) dy;
-                    ViewCompat.setTranslationY(mChildView, dy);
+                    if(mChildView!=null){
+                        ViewCompat.setTranslationY(mChildView, dy);
+                    }
                     requestLayout();
                     if (mHeaderView instanceof OnViewHeightListener) {
                         mOnViewHeightListener = (OnViewHeightListener) mHeaderView;
@@ -234,7 +236,10 @@ public class PullToRefreshLayout extends FrameLayout {
                         dy = Math.min(mMaxFooterHeight, Math.abs(dy));
                         dy = Math.max(0, Math.abs(dy));
                         mFooterView.getLayoutParams().height = (int) dy;
-                        ViewCompat.setTranslationY(mChildView, -dy);
+
+                        if(mChildView!=null){
+                            ViewCompat.setTranslationY(mChildView, -dy);
+                        }
                         requestLayout();
                         if (mFooterView instanceof OnViewHeightListener) {
                             mOnViewHeightListener = (OnViewHeightListener) mFooterView;
@@ -341,14 +346,18 @@ public class PullToRefreshLayout extends FrameLayout {
                 int value = (int) animation.getAnimatedValue();
                 if (state == REFRESH) {
                     mHeaderView.getLayoutParams().height = value;
-                    ViewCompat.setTranslationY(mChildView, value);
+                    if(mChildView!=null){
+                        ViewCompat.setTranslationY(mChildView, value);
+                    }
                     if (mHeaderView instanceof OnViewHeightListener) {
                         mOnViewHeightListener = (OnViewHeightListener) mHeaderView;
                         mOnViewHeightListener.onHeight(value, mMaxHeaderHeight);
                     }
                 } else {
                     mFooterView.getLayoutParams().height = value;
-                    ViewCompat.setTranslationY(mChildView, -value);
+                    if(mChildView!=null){
+                        ViewCompat.setTranslationY(mChildView, -value);
+                    }
                     if (mFooterView instanceof OnViewHeightListener) {
                         mOnViewHeightListener = (OnViewHeightListener) mFooterView;
                         mOnViewHeightListener.onHeight(value, mMaxHeaderHeight);
@@ -379,12 +388,12 @@ public class PullToRefreshLayout extends FrameLayout {
     }
 
     public void setRefreshing(boolean refreshing) {
-        mRefreshing = refreshing;
         if(refreshing){
             startRefresh(0, mHeaderHeight);
         }else{
             endRefresh();
         }
+        mRefreshing = refreshing;
     }
 
     public boolean isRefreshing() {
