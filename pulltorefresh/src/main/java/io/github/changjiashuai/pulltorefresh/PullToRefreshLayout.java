@@ -62,15 +62,17 @@ public class PullToRefreshLayout extends FrameLayout {
     }
 
     private void init(Context context, AttributeSet attrs) {
-        mHeaderHeight = dp2Px(context, mHeaderHeight);
         mFooterHeight = dp2Px(context, mFooterHeight);
-        mMaxHeaderHeight = 2 * mHeaderHeight;
         mMaxFooterHeight = 2 * mFooterHeight;
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.PullToRefreshLayout);
 
         LayoutInflater mInflater = (LayoutInflater)context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        mHeaderHeight = (int) a.getDimension(R.styleable.PullToRefreshLayout_headerHeight,100);
+        mMaxHeaderHeight = (int) a.getDimension(R.styleable.PullToRefreshLayout_headerMaxHeight,200);
+
         mHeaderViewResId = a.getResourceId(R.styleable.PullToRefreshLayout_headerView,
                 R.layout.header_view);
         mFooterViewResId = a.getResourceId(R.styleable.PullToRefreshLayout_footerView,
@@ -374,6 +376,19 @@ public class PullToRefreshLayout extends FrameLayout {
             }
             startRefresh(0, mHeaderHeight);
         }
+    }
+
+    public void setRefreshing(boolean refreshing) {
+        mRefreshing = refreshing;
+        if(refreshing){
+            startRefresh(0, mHeaderHeight);
+        }else{
+            endRefresh();
+        }
+    }
+
+    public boolean isRefreshing() {
+        return mRefreshing;
     }
 
     /**
