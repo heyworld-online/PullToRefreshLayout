@@ -1,13 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.1"
+    compileSdkVersion 30
+    buildToolsVersion APP_ANDROID_BUILD_TOOL_VERSION
 
     defaultConfig {
         applicationId "io.github.changjiashuai.pulltorefreshlayout"
-        minSdkVersion 17
-        targetSdkVersion 24
+        minSdkVersion 21
         versionCode 1
         versionName "1.0"
     }
