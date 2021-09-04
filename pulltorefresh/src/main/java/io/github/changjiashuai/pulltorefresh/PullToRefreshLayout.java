@@ -225,6 +225,9 @@ public class PullToRefreshLayout extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+
+        Log.i(TAG,"onTouchEvent event:"+event.getAction()+" mRefreshing:"+mRefreshing+" mLoading:"+mLoading);
+
         if (mRefreshing || mLoading) {
             return true;
         }
@@ -245,42 +248,53 @@ public class PullToRefreshLayout extends FrameLayout {
                         mOnViewHeightListener.onHeight(dy, mMaxHeaderHeight);
                     }
                 } else {
-                    if (canLoadMore) {
-                        dy = Math.min(mMaxFooterHeight, Math.abs(dy));
-                        dy = Math.max(0, Math.abs(dy));
-                        mFooterView.getLayoutParams().height = (int) dy;
+                    if (canRefresh){
+                        endRefresh();
+                    }else{
+                        if (canLoadMore) {
+                            dy = Math.min(mMaxFooterHeight, Math.abs(dy));
+                            dy = Math.max(0, Math.abs(dy));
+                            mFooterView.getLayoutParams().height = (int) dy;
 
-                        if(mChildView!=null){
-                            ViewCompat.setTranslationY(mChildView, -dy);
-                        }
-                        requestLayout();
-                        if (mFooterView instanceof OnViewHeightListener) {
-                            mOnViewHeightListener = (OnViewHeightListener) mFooterView;
-                            mOnViewHeightListener.onHeight(dy, mMaxFooterHeight);
+                            if(mChildView!=null){
+                                ViewCompat.setTranslationY(mChildView, -dy);
+                            }
+                            requestLayout();
+                            if (mFooterView instanceof OnViewHeightListener) {
+                                mOnViewHeightListener = (OnViewHeightListener) mFooterView;
+                                mOnViewHeightListener.onHeight(dy, mMaxFooterHeight);
+                            }
                         }
                     }
+
                 }
                 return true;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 int dy2 = (int) (event.getY() - mTouchY);
                 if (dy2 > 0 && canRefresh) {
+                    Log.i(TAG, "onTouchEvent ACTION_UP: dy2 > 0 && canRefresh");
                     if (dy2 >= mHeaderHeight) {
                         //
-                        Log.i(TAG, "onTouchEvent: 开始刷新");
+                        Log.i(TAG, "onTouchEvent ACTION_UP: 开始刷新");
                         startRefresh(dy2 > mMaxHeaderHeight ? mMaxHeaderHeight : dy2, mHeaderHeight);
                     } else if (dy2 > 0 && dy2 < mHeaderHeight) {
                         endRefresh(dy2);
-                        Log.i(TAG, "onTouchEvent: 结束刷新");
+                        Log.i(TAG, "onTouchEvent ACTION_UP: 结束刷新");
                     }
                 } else {
-                    if (canLoadMore) {
-                        if (Math.abs(dy2) >= mFooterHeight) {
-                            Log.i(TAG, "onTouchEvent: 开始上拉加载");
-                            startLoadMore(Math.abs(dy2) > mMaxFooterHeight ? mMaxFooterHeight : Math.abs(dy2), mFooterHeight);
-                        } else {
-                            endLoadMore(Math.abs(dy2));
-                            Log.i(TAG, "onTouchEvent: 结束上拉加载");
+                    if (canRefresh){
+                        Log.i(TAG, "onTouchEvent ACTION_UP endRefresh");
+                        endRefresh();
+                    }else{
+                        if (canLoadMore) {
+                            if (Math.abs(dy2) >= mFooterHeight) {
+                                Log.i(TAG, "onTouchEvent: 开始上拉加载");
+                                startLoadMore(Math.abs(dy2) > mMaxFooterHeight ? mMaxFooterHeight : Math.abs(dy2), mFooterHeight);
+                            } else {
+                                endLoadMore(Math.abs(dy2));
+                                Log.i(TAG, "onTouchEvent: 结束上拉加载");
+                            }
                         }
                     }
                 }
@@ -294,6 +308,7 @@ public class PullToRefreshLayout extends FrameLayout {
         mCurrentY = 0;
         mTouchY = 0;
     }
+
 
     public static final int REFRESH = 0;
     public static final int LOADMORE = 1;
@@ -327,7 +342,7 @@ public class PullToRefreshLayout extends FrameLayout {
             @Override
             public void onSuccess() {
                 mRefreshing = false;
-                Log.i(TAG, "onSuccess: ");
+                Log.i(TAG, "endRefresh onSuccess");
                 if (mHeaderView instanceof OnViewHeightListener) {
                     mOnViewHeightListener = (OnViewHeightListener) mHeaderView;
                     mOnViewHeightListener.end();
@@ -351,12 +366,17 @@ public class PullToRefreshLayout extends FrameLayout {
 
     private void createTranslationYAnimation(final int state, int startY, final int endY,
                                              final CallBack callBack) {
+        Log.i(TAG,"createTranslationYAnimation startY:"+startY+"\tendY:"+endY+"\tstate:"+state);
+
         ValueAnimator mValueAnimator = ValueAnimator.ofInt(startY, endY);
         mValueAnimator.setDuration(ANIM_TIME);
         mValueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 int value = (int) animation.getAnimatedValue();
+
+                Log.i(TAG,"createTranslationYAnimation onAnimationUpdate:"+value+"\tstate:"+state);
+
                 if (state == REFRESH) {
                     mHeaderView.getLayoutParams().height = value;
                     if(mChildView!=null){
@@ -417,8 +437,21 @@ public class PullToRefreshLayout extends FrameLayout {
      * 结束刷新
      */
     public void endRefresh() {
-        if (mHeaderView != null && mHeaderView.getLayoutParams().height > 0 && mRefreshing) {
-            endRefresh(mHeaderHeight);
+        if (mHeaderView != null){
+            Log.i(TAG,"endRefresh mHeaderView.height:"+mHeaderView.getHeight());
+            if(mHeaderView.getHeight() > 0){
+                mHeaderHeight = mHeaderView.getHeight();
+                if(mRefreshing){
+                    endRefresh(mHeaderHeight);
+                }else {
+                    ViewGroup.LayoutParams lp = mHeaderView.getLayoutParams();
+                    lp.height = 0;
+                    mHeaderView.setLayoutParams(lp);
+                    if(mChildView!=null){
+                        ViewCompat.setTranslationY(mChildView, 0);
+                    }
+                }
+            }
         }
     }
 
