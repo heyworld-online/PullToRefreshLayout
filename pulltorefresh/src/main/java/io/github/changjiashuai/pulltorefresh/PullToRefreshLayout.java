@@ -440,9 +440,8 @@ public class PullToRefreshLayout extends FrameLayout {
         if (mHeaderView != null){
             Log.i(TAG,"endRefresh mHeaderView.height:"+mHeaderView.getHeight());
             if(mHeaderView.getHeight() > 0){
-                mHeaderHeight = mHeaderView.getHeight();
                 if(mRefreshing){
-                    endRefresh(mHeaderHeight);
+                    endRefresh(mHeaderView.getHeight());
                 }else {
                     ViewGroup.LayoutParams lp = mHeaderView.getLayoutParams();
                     lp.height = 0;
