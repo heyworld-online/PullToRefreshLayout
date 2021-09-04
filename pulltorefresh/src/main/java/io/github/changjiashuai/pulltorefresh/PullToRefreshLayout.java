@@ -77,11 +77,24 @@ public class PullToRefreshLayout extends FrameLayout {
                 R.layout.header_view);
         mFooterViewResId = a.getResourceId(R.styleable.PullToRefreshLayout_footerView,
                 R.layout.footer_view);
-        a.recycle();
-        mHeaderView = mInflater.inflate(mHeaderViewResId, this, false);
-        mFooterView = mInflater.inflate(mFooterViewResId, this, false);
 
-        Log.i("TAG", "init: childCount=" + getChildCount());
+        a.recycle();
+
+        if(mHeaderViewResId != R.layout.header_view){
+            mHeaderView = mInflater.inflate(mHeaderViewResId, this, false);
+            canRefresh = true;
+        }else {
+            canRefresh = false;
+        }
+
+        if(mFooterViewResId!= R.layout.footer_view){
+            mFooterView = mInflater.inflate(mFooterViewResId, this, false);
+            canLoadMore = true;
+        }else {
+            canLoadMore = false;
+        }
+
+
 //        if (getChildCount() != 1) {
 //            throw new IllegalArgumentException("child only can be one!");
 //        }
